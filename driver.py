@@ -24,9 +24,9 @@ CONTROLS = {
     'button4': 0x04,
     'button5': 0x05,
     'button6': 0x06,
-    'knob_cw': 0x0d,    # Clockwise rotation
-    'knob_ccw': 0x0e,   # Counter-clockwise rotation
-    'knob_click': 0x0f, # Knob press
+    'knob_cw': 0x0f,    # Clockwise rotation
+    'knob_ccw': 0x0d,   # Counter-clockwise rotation
+    'knob_click': 0x0e, # Knob press
 }
 
 # Modifier key flags
