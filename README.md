@@ -1,6 +1,6 @@
 # Macro Keyboard Driver
 
-A simple, lightweight Python driver for configuring a 6-button USB macro keyboard with rotary encoder on Linux (and Windows via WSL2).
+A simple, lightweight Python driver for configuring a 6-button USB macro keyboard with rotary encoder on Linux (and Windows via WSL2). Supports both standard keys and media keys (prev, play, next, stop, volume, mute).
 
 > **Alternative:** If you're looking for a more feature-rich Windows GUI application with macro sequences, LED control, and advanced features, check out [MacroPad by rOzzy1987](https://github.com/rOzzy1987/MacroPad). This project focuses on a minimal, scriptable command-line approach for Linux users.
 
@@ -34,6 +34,7 @@ This driver works with cheap 6-button macro keyboards commonly sold on AliExpres
 - Configure any of the 6 buttons to any key
 - Configure rotary knob click and rotation directions
 - Support for modifier keys (Ctrl, Shift, Alt, Win/Cmd)
+- Media key support (prev, play, next, stop, mute, volumeup, volumedown)
 - Configuration stored in device firmware (persists across reboots)
 - Works on Linux, macOS, and Windows (via WSL2)
 
@@ -124,8 +125,13 @@ sudo python3 driver.py set button4 s --mod ctrl      # Ctrl+S (save)
 sudo python3 driver.py set button5 tab --mod alt     # Alt+Tab
 sudo python3 driver.py set button6 f4 --mod alt      # Alt+F4
 
+# Media keys
+sudo python3 driver.py set button1 prev              # Previous track
+sudo python3 driver.py set button2 play              # Play/Pause
+sudo python3 driver.py set button3 next              # Next track
+
 # Rotary knob
-sudo python3 driver.py set knob_click enter          # Click = Enter
+sudo python3 driver.py set knob_click mute           # Click = Mute
 sudo python3 driver.py set knob_cw volumeup          # Clockwise = Volume Up
 sudo python3 driver.py set knob_ccw volumedown       # Counter-clockwise = Volume Down
 ```
@@ -189,6 +195,7 @@ sudo python3 driver.py monitor
 - `minus`, `equal`, `leftbrace`, `rightbrace`, `backslash`
 - `semicolon`, `apostrophe`, `grave`, `comma`, `dot`, `slash`
 - `mute`, `volumeup`, `volumedown`
+- `prev`, `next`, `play`, `stop`
 
 ## WSL2 Setup (Detailed)
 
@@ -278,7 +285,7 @@ The device exposes 4 HID interfaces:
 
 The device is configured by sending 64-byte HID reports to Interface 1.
 
-**Report Format:**
+**Keyboard Report Format (standard keys):**
 
 ```
 Byte 0:     Report ID     = 0x03
@@ -290,6 +297,19 @@ Byte 5:     Modifier      = 0x00 (none), or Ctrl/Shift/Alt flags
 Byte 6:     Keycode       = USB HID keycode
 Bytes 7-63: Padding       = 0x00
 ```
+
+**Media Key Report Format:**
+
+```
+Byte 0:     Report ID     = 0x03
+Byte 1:     Control ID    = 0x01-0x06 (buttons), 0x0d-0x0f (knob)
+Byte 2:     Command       = 0x12 (set media key)
+Byte 3:     Usage Low     = Low byte of Consumer Page usage code
+Byte 4:     Usage High    = High byte of Consumer Page usage code
+Bytes 5-63: Padding       = 0x00
+```
+
+Media keys use a single report (no init/query/save sequence) with command byte `0x12` and the 16-bit USB Consumer Page usage code instead of modifier+keycode.
 
 **Control IDs:**
 
@@ -305,12 +325,14 @@ Bytes 7-63: Padding       = 0x00
 | 0x0e | Knob counter-clockwise |
 | 0x0f | Knob click |
 
-**Command Sequence:**
+**Command Sequence (standard keys):**
 
 1. **Init**: `03 a1 01 00 00...` (64 bytes)
 2. **Query**: `03 XX 11 01 00 00 00...` (XX = control ID)
 3. **Set**: `03 XX 11 01 01 MM KK 00...` (MM = modifier, KK = keycode)
 4. **Save**: `03 aa aa 00 00...`
+
+**Media keys** skip the init/query/save sequence and use a single report: `03 XX 12 LL HH 00...` (LL = usage low, HH = usage high).
 
 **Modifier Flags:**
 
@@ -348,8 +370,9 @@ The configuration protocol was reverse-engineered by:
 Key discoveries:
 - Interface 1 (EP 2 OUT) is used for configuration (no hidraw device in Linux)
 - Configuration is stored in device firmware (persists across power cycles)
-- Device uses standard USB HID keycodes
+- Device uses standard USB HID keycodes for keyboard keys and Consumer Page usage codes for media keys
 - `0xaa 0xaa` magic bytes indicate "save" command
+- Media keys use command byte `0x12` instead of `0x11`, with a single report (no init/query/save)
 
 ## Files
 

@@ -70,6 +70,14 @@ KEYCODES = {
     'mute': 0x7f, 'volumeup': 0x80, 'volumedown': 0x81,
 }
 
+# Media keys (Consumer Page HID codes - need different protocol)
+MEDIA_KEYS = {
+    'prev': 0xb6,
+    'next': 0xb5,
+    'play': 0xcd,
+    'stop': 0xb7,
+}
+
 # Reverse lookup for keycodes
 KEYCODE_NAMES = {v: k for k, v in KEYCODES.items()}
 
@@ -116,9 +124,11 @@ def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
         print(f"Valid controls: {', '.join(CONTROLS.keys())}")
         return False
 
-    if key not in KEYCODES:
+    is_media = key in MEDIA_KEYS
+    if not is_media and key not in KEYCODES:
         print(f"Error: Unknown key '{key}'")
         print(f"Valid keys: {', '.join(sorted(KEYCODES.keys()))}")
+        print(f"Media keys: {', '.join(sorted(MEDIA_KEYS.keys()))}")
         return False
 
     if modifier not in MODIFIERS:
@@ -127,7 +137,8 @@ def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
         return False
 
     control_id = CONTROLS[control]
-    keycode = KEYCODES[key]
+    keycode = KEYCODES.get(key, 0)
+    media_code = MEDIA_KEYS.get(key, 0)
     mod = MODIFIERS[modifier]
 
     # Find the device
@@ -156,10 +167,15 @@ def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
             dev.write(CONFIG_ENDPOINT, data, timeout=1000)
             time.sleep(0.01)  # Small delay between commands
 
-        send_report(cmd_init())
-        send_report(cmd_query(control_id))
-        send_report(cmd_set(control_id, mod, keycode))
-        send_report(cmd_save())
+        if is_media:
+            low = media_code & 0xFF
+            high = (media_code >> 8) & 0xFF
+            send_report(build_report([0x03, control_id, 0x12, low, high]))
+        else:
+            send_report(cmd_init())
+            send_report(cmd_query(control_id))
+            send_report(cmd_set(control_id, mod, keycode))
+            send_report(cmd_save())
 
         mod_str = f" + {modifier}" if modifier != 'none' else ""
         print(f"Configured {control} -> {key}{mod_str}")
@@ -212,18 +228,25 @@ def configure_all(config: dict) -> bool:
             if control not in CONTROLS:
                 print(f"Warning: Unknown control '{control}', skipping")
                 continue
-            if key not in KEYCODES:
+            is_media = key in MEDIA_KEYS
+            if not is_media and key not in KEYCODES:
                 print(f"Warning: Unknown key '{key}', skipping")
                 continue
 
             control_id = CONTROLS[control]
-            keycode = KEYCODES[key]
+            keycode = KEYCODES.get(key, 0)
+            media_code = MEDIA_KEYS.get(key, 0)
             mod = MODIFIERS.get(modifier, 0x00)
 
-            send_report(cmd_init())
-            send_report(cmd_query(control_id))
-            send_report(cmd_set(control_id, mod, keycode))
-            send_report(cmd_save())
+            if is_media:
+                low = media_code & 0xFF
+                high = (media_code >> 8) & 0xFF
+                send_report(build_report([0x03, control_id, 0x12, low, high]))
+            else:
+                send_report(cmd_init())
+                send_report(cmd_query(control_id))
+                send_report(cmd_set(control_id, mod, keycode))
+                send_report(cmd_save())
 
             mod_str = f" + {modifier}" if modifier != 'none' else ""
             print(f"Configured {control} -> {key}{mod_str}")
@@ -303,7 +326,8 @@ def list_keys():
     }
     for cat, keys in categories.items():
         print(f"  {cat}: {', '.join(sorted(keys))}")
-    print(f"\nAvailable modifiers: {', '.join(MODIFIERS.keys())}")
+    print(f"\nMedia keys: {', '.join(sorted(MEDIA_KEYS.keys()))}")
+    print(f"Available modifiers: {', '.join(MODIFIERS.keys())}")
 
 
 def list_controls():
