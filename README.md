@@ -3,6 +3,8 @@
 A simple, lightweight Python driver for configuring a 6-button USB macro keyboard with rotary encoder on Linux (and Windows via WSL2). Supports both standard keys and media keys (prev, play, next, stop, volume, mute).
 
 > **Alternative:** If you're looking for a more feature-rich Windows GUI application with macro sequences, LED control, and advanced features, check out [MacroPad by rOzzy1987](https://github.com/rOzzy1987/MacroPad). This project focuses on a minimal, scriptable command-line approach for Linux users.
+>
+> **Nota:** Este fork foi desenvolvido com assistência de Claude, Gemini e DeepSeek.
 
 ## Supported Device
 
