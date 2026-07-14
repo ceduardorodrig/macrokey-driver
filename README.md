@@ -334,7 +334,7 @@ Media keys use a single report (no init/query/save sequence) with command byte `
 3. **Set**: `03 XX 11 01 01 MM KK 00...` (MM = modifier, KK = keycode)
 4. **Save**: `03 aa aa 00 00...`
 
-**Media keys** skip the init/query/save sequence and use a single report: `03 XX 12 LL HH 00...` (LL = usage low, HH = usage high).
+**Media keys** skip the init/query sequence but still require the save command: `03 XX 12 LL HH 00...` + `03 aa aa 00...` (LL = usage low, HH = usage high).
 
 **Modifier Flags:**
 
@@ -374,7 +374,7 @@ Key discoveries:
 - Configuration is stored in device firmware (persists across power cycles)
 - Device uses standard USB HID keycodes for keyboard keys and Consumer Page usage codes for media keys
 - `0xaa 0xaa` magic bytes indicate "save" command
-- Media keys use command byte `0x12` instead of `0x11`, with a single report (no init/query/save)
+- Media keys use command byte `0x12` instead of `0x11`, with a single set report followed by save (no init/query)
 
 ## Files
 
