@@ -171,6 +171,7 @@ def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
             low = media_code & 0xFF
             high = (media_code >> 8) & 0xFF
             send_report(build_report([0x03, control_id, 0x12, low, high]))
+            send_report(cmd_save())
         else:
             send_report(cmd_init())
             send_report(cmd_query(control_id))
@@ -242,6 +243,7 @@ def configure_all(config: dict) -> bool:
                 low = media_code & 0xFF
                 high = (media_code >> 8) & 0xFF
                 send_report(build_report([0x03, control_id, 0x12, low, high]))
+                send_report(cmd_save())
             else:
                 send_report(cmd_init())
                 send_report(cmd_query(control_id))
