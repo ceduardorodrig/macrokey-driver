@@ -110,6 +110,54 @@ def cmd_save() -> bytes:
     return build_report([0x03, 0xaa, 0xaa, 0x00])
 
 
+def _acquire_device():
+    """Find and claim the macro keyboard USB device. Returns dev or None."""
+    import usb.core
+    import usb.util
+    dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+    if dev is None:
+        print("Error: Device not found. Is it connected?")
+        return None
+    if dev.is_kernel_driver_active(CONFIG_INTERFACE):
+        dev.detach_kernel_driver(CONFIG_INTERFACE)
+    try:
+        dev.set_configuration()
+    except usb.core.USBError:
+        pass
+    usb.util.claim_interface(dev, CONFIG_INTERFACE)
+    return dev
+
+
+def _release_device(dev):
+    """Release interface and reattach kernel driver."""
+    import usb.util
+    usb.util.release_interface(dev, CONFIG_INTERFACE)
+    try:
+        dev.attach_kernel_driver(CONFIG_INTERFACE)
+    except usb.core.USBError:
+        pass
+
+
+def _send_report(dev, data):
+    """Send a HID report with a small delay."""
+    dev.write(CONFIG_ENDPOINT, data, timeout=1000)
+    time.sleep(0.01)
+
+
+def _send_config(dev, control_id, is_media, keycode, media_code, mod):
+    """Send the key configuration sequence to the device."""
+    if is_media:
+        low = media_code & 0xFF
+        high = (media_code >> 8) & 0xFF
+        _send_report(dev, build_report([0x03, control_id, 0x12, low, high]))
+        _send_report(dev, cmd_save())
+    else:
+        _send_report(dev, cmd_init())
+        _send_report(dev, cmd_query(control_id))
+        _send_report(dev, cmd_set(control_id, mod, keycode))
+        _send_report(dev, cmd_save())
+
+
 def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
     """Configure a control to send a specific key using pyusb."""
     try:
@@ -141,90 +189,35 @@ def configure_key(control: str, key: str, modifier: str = 'none') -> bool:
     media_code = MEDIA_KEYS.get(key, 0)
     mod = MODIFIERS[modifier]
 
-    # Find the device
-    dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+    dev = _acquire_device()
     if dev is None:
-        print("Error: Device not found. Is it connected?")
         return False
 
     try:
-        # Detach kernel driver if necessary
-        if dev.is_kernel_driver_active(CONFIG_INTERFACE):
-            dev.detach_kernel_driver(CONFIG_INTERFACE)
-            print("Detached kernel driver from interface 1")
-
-        # Set configuration and claim interface
-        try:
-            dev.set_configuration()
-        except usb.core.USBError:
-            pass  # May already be configured
-
-        usb.util.claim_interface(dev, CONFIG_INTERFACE)
-
-        # Send configuration sequence
-        def send_report(data):
-            # Use interrupt OUT transfer
-            dev.write(CONFIG_ENDPOINT, data, timeout=1000)
-            time.sleep(0.01)  # Small delay between commands
-
-        if is_media:
-            low = media_code & 0xFF
-            high = (media_code >> 8) & 0xFF
-            send_report(build_report([0x03, control_id, 0x12, low, high]))
-            send_report(cmd_save())
-        else:
-            send_report(cmd_init())
-            send_report(cmd_query(control_id))
-            send_report(cmd_set(control_id, mod, keycode))
-            send_report(cmd_save())
-
+        _send_config(dev, control_id, is_media, keycode, media_code, mod)
         mod_str = f" + {modifier}" if modifier != 'none' else ""
         print(f"Configured {control} -> {key}{mod_str}")
         return True
-
     except usb.core.USBError as e:
         print(f"USB Error: {e}")
         return False
     finally:
-        usb.util.release_interface(dev, CONFIG_INTERFACE)
-        # Reattach kernel driver
-        try:
-            dev.attach_kernel_driver(CONFIG_INTERFACE)
-        except usb.core.USBError:
-            pass
+        _release_device(dev)
 
 
 def configure_all(config: dict) -> bool:
     """Configure multiple controls at once."""
     try:
         import usb.core
-        import usb.util
     except ImportError:
         print("Error: pyusb not installed. Run: pip install pyusb")
         return False
 
-    # Find the device
-    dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
+    dev = _acquire_device()
     if dev is None:
-        print("Error: Device not found. Is it connected?")
         return False
 
     try:
-        # Detach kernel driver if necessary
-        if dev.is_kernel_driver_active(CONFIG_INTERFACE):
-            dev.detach_kernel_driver(CONFIG_INTERFACE)
-
-        try:
-            dev.set_configuration()
-        except usb.core.USBError:
-            pass
-
-        usb.util.claim_interface(dev, CONFIG_INTERFACE)
-
-        def send_report(data):
-            dev.write(CONFIG_ENDPOINT, data, timeout=1000)
-            time.sleep(0.01)
-
         for control, (key, modifier) in config.items():
             if control not in CONTROLS:
                 print(f"Warning: Unknown control '{control}', skipping")
@@ -239,31 +232,16 @@ def configure_all(config: dict) -> bool:
             media_code = MEDIA_KEYS.get(key, 0)
             mod = MODIFIERS.get(modifier, 0x00)
 
-            if is_media:
-                low = media_code & 0xFF
-                high = (media_code >> 8) & 0xFF
-                send_report(build_report([0x03, control_id, 0x12, low, high]))
-                send_report(cmd_save())
-            else:
-                send_report(cmd_init())
-                send_report(cmd_query(control_id))
-                send_report(cmd_set(control_id, mod, keycode))
-                send_report(cmd_save())
-
+            _send_config(dev, control_id, is_media, keycode, media_code, mod)
             mod_str = f" + {modifier}" if modifier != 'none' else ""
             print(f"Configured {control} -> {key}{mod_str}")
 
         return True
-
     except usb.core.USBError as e:
         print(f"USB Error: {e}")
         return False
     finally:
-        usb.util.release_interface(dev, CONFIG_INTERFACE)
-        try:
-            dev.attach_kernel_driver(CONFIG_INTERFACE)
-        except usb.core.USBError:
-            pass
+        _release_device(dev)
 
 
 def monitor_input():

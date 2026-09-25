@@ -1,10 +1,12 @@
 # Macro Keyboard Driver
 
+[![Vibe Coded](https://img.shields.io/badge/vibe-coded-8A2BE2)](https://github.com/ceduardorodrig)
+
 A simple, lightweight Python driver for configuring a 6-button USB macro keyboard with rotary encoder on Linux (and Windows via WSL2). Supports both standard keys and media keys (prev, play, next, stop, volume, mute).
 
 > **Alternative:** If you're looking for a more feature-rich Windows GUI application with macro sequences, LED control, and advanced features, check out [MacroPad by rOzzy1987](https://github.com/rOzzy1987/MacroPad). This project focuses on a minimal, scriptable command-line approach for Linux users.
 >
-> **Nota:** Este fork foi desenvolvido com assistência de Claude, Gemini e DeepSeek.
+> 🔮 **Vibe Coded:** Este fork foi desenvolvido e aprimorado com vibe coding e assistência de IA (Claude, Gemini, DeepSeek e Antigravity).
 
 ## Supported Device
 
