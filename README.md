@@ -6,7 +6,7 @@ A simple, lightweight Python driver for configuring a 6-button USB macro keyboar
 
 > **Alternative:** If you're looking for a more feature-rich Windows GUI application with macro sequences, LED control, and advanced features, check out [MacroPad by rOzzy1987](https://github.com/rOzzy1987/MacroPad). This project focuses on a minimal, scriptable command-line approach for Linux users.
 >
-> 🔮 **Vibe Coded:** Este fork foi desenvolvido e aprimorado com vibe coding e assistência de IA (Claude, Gemini, DeepSeek e Antigravity).
+> 🔮 **Vibe Coded:** This fork was developed and enhanced with vibe coding and AI assistance (Claude, Gemini, DeepSeek, and Antigravity).
 
 ## Supported Device
 
@@ -402,3 +402,13 @@ mcrokeydriver/
 ## License
 
 MIT
+
+---
+
+<div align="center">
+
+> **Yes... This is a Vibe Coded project**
+>
+> Governed by 🤖 **StenioSentinel** (our Rust-based AI Governance Sentinel) with **Carlos Eduardo Rodrigues** ([@ceduardorodrig](https://github.com/ceduardorodrig)).
+
+</div>
