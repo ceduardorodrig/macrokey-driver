@@ -1,0 +1,33 @@
+name: ci
+
+# Auditoria de governança pelo StenioSentinel — escopo DERIVADO.
+#
+# Este repositório é um FORK de nonatofabio/macrokey-driver. As leis autorais do
+# ecossistema (ARCH-*, RUST-*, GOV-AGENT-LAWS) descrevem como o autor constrói o
+# próprio software, não como se contribui num projeto de terceiros — aplicá-las
+# aqui exigiria reescrever o upstream.
+#
+# `--scope fork` mantém só o que protege um derivado: SEC-SECRETS, integridade de
+# notas, disclaimer e higiene de artefatos. Ver:
+#   governance/agent-conventions.md §2b (categorias de repositório)
+#   governance/stenio-troubleshooting.md §3 (o falso-positivo catalogado)
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Governance Audit (derived repo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: StenioSentinel — auditar repositório derivado
+        uses: ceduardorodrig/STENIO-SENTINEL/.github/actions/stenio-check@v1
+        with:
+          scope: fork
+          path: .
+          github-format: "true"
