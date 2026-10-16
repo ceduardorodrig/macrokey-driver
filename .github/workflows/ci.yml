@@ -23,7 +23,7 @@ jobs:
     name: Governance Audit (derived repo)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: StenioSentinel — auditar repositório derivado
         uses: ceduardorodrig/STENIO-SENTINEL/.github/actions/stenio-check@v1
