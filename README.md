@@ -6,11 +6,6 @@ A simple, lightweight Python driver for configuring a 6-button USB macro keyboar
 
 > **Alternative:** If you're looking for a more feature-rich Windows GUI application with macro sequences, LED control, and advanced features, check out [MacroPad by rOzzy1987](https://github.com/rOzzy1987/MacroPad). This project focuses on a minimal, scriptable command-line approach for Linux users.
 
-🛡️ Human-in-the-Loop Agentic Engineering
-
-Developed by Carlos Eduardo Rodrigues with AI coding agents.
-Every change is verified by the deterministic quality gate StenioSentinel.
-
 ## Supported Device
 
 This driver works with cheap 6-button macro keyboards commonly sold on AliExpress/Amazon with the following identifiers:
@@ -405,3 +400,10 @@ mcrokeydriver/
 ## License
 
 MIT
+
+---
+
+🛡️ Human-in-the-Loop Agentic Engineering
+
+Developed by Carlos Eduardo Rodrigues with AI coding agents.
+Every change is verified by the deterministic quality gate StenioSentinel.
