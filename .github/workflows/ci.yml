@@ -31,3 +31,8 @@ jobs:
           scope: fork
           path: .
           github-format: "true"
+
+      # GOV-LOG-EN (tag gov, steniocheck.toml): log and CLI strings stay in English. Custom rules are dropped by scope fork, so
+      # this pass runs them by tag. The action leaves the verified binary in RUNNER_TEMP.
+      - name: StenioSentinel (app rules, tag gov)
+        run: '"$RUNNER_TEMP/stenio/stenio" --tag gov --strict --compact'
