@@ -8,9 +8,9 @@ This repository contains **MACROKEY-DRIVER**, a driver and configuration tool fo
 
 When modifying any file in this repository, follow these mandatory governance rules:
 
-**Language Tier:** A (Public OSS) — see [language-policy.md](file:///mnt/NVME_PCI/agentic-ai/governance/language-policy.md). All logs, CLI strings, documentation, and comments MUST be in English.
+**Language Tier:** A (Public OSS) — see the StenioSentinel language policy (Tier A). All logs, CLI strings, documentation, and comments MUST be in English.
 
-**Repository Category: DERIVED (fork)** — see [agent-conventions.md](file:///mnt/NVME_PCI/agentic-ai/governance/agent-conventions.md) §2b.
+**Repository Category: DERIVED (fork)** — see the StenioSentinel agent conventions (section 2b, derived repositories).
 
 > This repository is a **fork** of [`nonatofabio/macrokey-driver`](https://github.com/nonatofabio/macrokey-driver).
 > It is **not authored code**: upstream is the source of truth for the driver itself, and
