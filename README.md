@@ -21,7 +21,7 @@ This driver works with cheap 6-button macro keyboards commonly sold on AliExpres
 
 ![Macro Keyboard](https://ae-pic-a1.aliexpress-media.com/kf/S6c3b94647e1548e4a6e93b5f0eaa99acW.jpg_480x480.jpg_.webp)
 
-## Features
+### Device identifiers
 
 | Property | Value |
 |----------|-------|
